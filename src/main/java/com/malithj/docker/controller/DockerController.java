@@ -14,7 +14,7 @@ public class DockerController implements Runnable
     private static final String FILENAME = "/Users/temp/docker-controller/docker_stats";
     public final int MONITERING_FREQUENCY = 1000;
     public final int TIME_BETWEEN_KILLS= 10000;
-    public final float MEMORY_LIMIT = 450;
+    public final float MEMORY_LIMIT = 160;
     private int count;
 
 
