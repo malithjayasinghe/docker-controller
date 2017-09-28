@@ -75,7 +75,7 @@ public class DockerController implements Runnable
     private String [] getRestartContainerIDs() throws IOException {
         ArrayList<String> containerToRestart = new ArrayList<>();
         Runtime rt = Runtime.getRuntime();
-        Process proc= rt.exec("Docker stats");
+        Process proc= rt.exec("docker stats --no-stream");
         BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
         String line;
         String memoryRegex = "%               (.*?)MiB /";
