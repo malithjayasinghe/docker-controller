@@ -14,7 +14,7 @@ public class DockerController implements Runnable
     private static final String FILENAME = "/Users/temp/docker-controller/docker_stats";
     public final int MONITERING_FREQUENCY = 1000;
     public final int TIME_BETWEEN_KILLS= 10000;
-    public final float MEMORY_LIMIT = 160;
+    public final float MEMORY_LIMIT = 800;
     private int count;
 
 
@@ -98,34 +98,6 @@ public class DockerController implements Runnable
         return containerToRestart.toArray(new String[containerToRestart.size()]);
     }
 
-
-    private String [] getRestartContainerIDsFromFile()
-    {
-        ArrayList<String> containerToRestart = new ArrayList<>();
-        String memoryRegex = "%               (.*?)MiB /";
-        String containerIDRegex = "(.*?)        ";
-        // Create a Pattern object
-        Pattern memoryPattern = Pattern.compile(memoryRegex);
-        Pattern containerIDPattern = Pattern.compile(containerIDRegex);
-        try(BufferedReader br = new BufferedReader(new FileReader(FILENAME))) {
-            for(String line; (line = br.readLine()) != null; ) {
-                System.out.println(line);
-                Matcher m1 = memoryPattern.matcher(line);
-                Matcher m2 = containerIDPattern.matcher(line);
-                if(m1.find() && m2.find()) {
-                    if(Float.valueOf(m1.group(1)) > MEMORY_LIMIT) {
-                        System.out.print("value = " + Float.valueOf(m1.group(1)) +"\n");
-                        containerToRestart.add(m2.group(1));
-                    }
-                }
-
-            }
-        }catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        return containerToRestart.toArray(new String[containerToRestart.size()]);
-    }
 
     public static void main(String args[])
     {
