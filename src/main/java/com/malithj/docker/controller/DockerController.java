@@ -32,7 +32,6 @@ public class DockerController implements Runnable
                 Runtime rt = Runtime.getRuntime();
 
                 String array [] = getRestartContainerIDs();
-                System.exit(1);
 
 
                 Thread.sleep(MONITERING_FREQUENCY);
@@ -40,7 +39,7 @@ public class DockerController implements Runnable
                 for (int i = 0; i < array.length; i++)
                 {
                     String command1 = command + " " + array[i];
-                    System.out.println(command1);
+                    System.out.println("killing the container " +  command1);
                     Process proc = rt.exec(command1);
                     BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
                     BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
@@ -58,6 +57,9 @@ public class DockerController implements Runnable
 
                     Thread.sleep(TIME_BETWEEN_KILLS);
                 }
+
+                System.out.print("\n");
+
 
             }catch (Exception e)
             {
