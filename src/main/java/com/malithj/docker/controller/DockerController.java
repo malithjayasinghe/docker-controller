@@ -32,6 +32,8 @@ public class DockerController implements Runnable
                 Runtime rt = Runtime.getRuntime();
                 String array [] = getRestartContainerIDs();
 
+                System.exit(1);
+
                 Thread.sleep(MONITERING_FREQUENCY);
 
                 for (int i = 0; i < array.length; i++)
