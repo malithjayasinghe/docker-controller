@@ -87,10 +87,8 @@ public class DockerController implements Runnable
                     containerToRestart.add(m2.group(1));
                 }
             }
-
-            System.out.println(line);
         }
-
+        System.out.println("\n");
 
         return containerToRestart.toArray(new String[containerToRestart.size()]);
     }
