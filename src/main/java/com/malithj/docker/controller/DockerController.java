@@ -12,9 +12,9 @@ public class DockerController implements Runnable
 {
 
     private static final String FILENAME = "/Users/temp/docker-controller/docker_stats";
-    public final int MONITERING_FREQUENCY = 10;
-    public final int TIME_BETWEEN_KILLS= 100;
-    public final float MEMORY_LIMIT = 100;
+    public final int MONITERING_FREQUENCY = 1000;
+    public final int TIME_BETWEEN_KILLS= 10000;
+    public final float MEMORY_LIMIT = 450;
     private int count;
 
 
@@ -31,9 +31,6 @@ public class DockerController implements Runnable
                 String command = "docker stop";
                 Runtime rt = Runtime.getRuntime();
                 String array [] = getRestartContainerIDs();
-                for (String item : array) {
-                    System.out.println(item);
-                }
 
                 Thread.sleep(MONITERING_FREQUENCY);
 
@@ -42,13 +39,10 @@ public class DockerController implements Runnable
                     String command1 = command + " " + array[i];
                     System.out.println(command1);
                     Process proc = rt.exec(command1);
-
-
                     BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
                     BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-
                     System.out.println("Here is the standard output of the command:\n");
-                    String s = null;
+                    String s;
 
                     while ((s = stdInput.readLine()) != null) {
                         System.out.println(s);
@@ -90,10 +84,11 @@ public class DockerController implements Runnable
             if(m1.find() && m2.find()) {
 
                 if(Float.valueOf(m1.group(1)) > MEMORY_LIMIT) {
-                    System.out.print("value = " + Float.valueOf(m1.group(1)) +"\n");
                     containerToRestart.add(m2.group(1));
                 }
             }
+
+            System.out.println(line);
         }
 
 
