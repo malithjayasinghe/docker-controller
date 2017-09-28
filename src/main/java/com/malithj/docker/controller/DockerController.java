@@ -77,7 +77,8 @@ public class DockerController implements Runnable
         Process proc= rt.exec("docker stats --no-stream");
         BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
         String line;
-        String memoryRegex = "%               (.*?)MiB /";
+        String memoryRegex = "%(.*?)MiB /";
+
         String containerIDRegex = "(.*?)        ";
         Pattern memoryPattern = Pattern.compile(memoryRegex);
         Pattern containerIDPattern = Pattern.compile(containerIDRegex);
