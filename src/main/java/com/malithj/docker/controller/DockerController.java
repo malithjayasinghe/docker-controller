@@ -30,9 +30,10 @@ public class DockerController implements Runnable
             try {
                 String command = "docker stop";
                 Runtime rt = Runtime.getRuntime();
+                System.exit(1);
                 String array [] = getRestartContainerIDs();
 
-                System.exit(1);
+
 
                 Thread.sleep(MONITERING_FREQUENCY);
 
