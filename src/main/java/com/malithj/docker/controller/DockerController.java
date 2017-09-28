@@ -81,7 +81,7 @@ public class DockerController implements Runnable
         Pattern containerIDPattern = Pattern.compile(containerIDRegex);
 
         while ((line = stdInput.readLine()) != null) {
-            //System.out.println(line);
+            System.out.println(line);
             Matcher m1 = memoryPattern.matcher(line);
             Matcher m2 = containerIDPattern.matcher(line);
             if(m1.find() && m2.find()) {
