@@ -88,9 +88,11 @@ public class DockerController implements Runnable
             Matcher m2 = containerIDPattern.matcher(line);
             if(m1.find() && m2.find()) {
 
+                System.out.println("(a) - current memory = " + m1.group(1) + "memory limit = " + MEMORY_LIMIT);
+
                 if(Float.valueOf(m1.group(1)) > MEMORY_LIMIT) {
 
-                    System.out.println("current memory = " + m1.group(1) + "memory limit = " + MEMORY_LIMIT);
+                    System.out.println("(b) current memory = " + m1.group(1) + "memory limit = " + MEMORY_LIMIT);
                     containerToRestart.add(m2.group(1));
                 }
             }
