@@ -12,9 +12,9 @@ public class DockerController implements Runnable
 {
 
     private static final String FILENAME = "/Users/temp/docker-controller/docker_stats";
-    public final int MONITERING_FREQUENCY = 1000;
-    public final int TIME_BETWEEN_KILLS= 10000;
-    public final float MEMORY_LIMIT = 450;
+    public final int MONITERING_FREQUENCY = 100;
+    public final int TIME_BETWEEN_KILLS= 7000;
+    public final float MEMORY_LIMIT = 400;
     public static int killcount = 0;
     private int count;
 
@@ -92,7 +92,8 @@ public class DockerController implements Runnable
             Matcher m2 = containerIDPattern.matcher(line);
             if(m1.find() && m2.find()) {
 
-                if(Float.parseFloat(m1.group(1)) > MEMORY_LIMIT) {
+                float usedMemory = Float.parseFloat(m1.group(1));
+                if(usedMemory  > MEMORY_LIMIT) {
 
 
                     System.out.println("      Adding to kill list: current memory = " + Float.parseFloat(m1.group(1)) + "   memory limit = " + MEMORY_LIMIT);
