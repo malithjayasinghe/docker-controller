@@ -28,7 +28,7 @@ public class DockerController implements Runnable
         while(true)
         {
             try {
-                String command = "docker kill";
+                String command = "docker stop --time 5";
                 Runtime rt = Runtime.getRuntime();
 
                 String array [] = getRestartContainerIDs();
