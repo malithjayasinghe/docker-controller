@@ -91,7 +91,7 @@ public class DockerController implements Runnable
 
                 System.out.println("(a) - current memory = " + m1.group(1) + "memory limit = " + MEMORY_LIMIT);
 
-                if(Float.valueOf(m1.group(1)) > MEMORY_LIMIT) {
+                if(Float.parseFloat(m1.group(1)) > MEMORY_LIMIT) {
 
                     System.out.println("(b) current memory = " + m1.group(1) + "memory limit = " + MEMORY_LIMIT);
                     containerToRestart.add(m2.group(1));
