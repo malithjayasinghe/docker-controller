@@ -15,6 +15,7 @@ public class DockerController implements Runnable
     public final int MONITERING_FREQUENCY = 1000;
     public final int TIME_BETWEEN_KILLS= 10000;
     public final float MEMORY_LIMIT = 450;
+    public static int killcount = 0;
     private int count;
 
 
@@ -41,6 +42,8 @@ public class DockerController implements Runnable
                     String command1 = command + " " + array[i];
                     System.out.println("killing the container " +  command1);
                     Process proc = rt.exec(command1);
+                    System.out.println("kill counter = " + killcount++);
+
                     BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
                     BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
                     System.out.println("Here is the standard output of the command:\n");
@@ -89,11 +92,11 @@ public class DockerController implements Runnable
             Matcher m2 = containerIDPattern.matcher(line);
             if(m1.find() && m2.find()) {
 
-                System.out.println("(a) - current memory = " + m1.group(1) + "memory limit = " + MEMORY_LIMIT);
-
                 if(Float.parseFloat(m1.group(1)) > MEMORY_LIMIT) {
 
-                    System.out.println("(b) current memory = " + m1.group(1) + "memory limit = " + MEMORY_LIMIT);
+
+                    System.out.println("      Adding to kill list: current memory = " + Float.parseFloat(m1.group(1)) + "   memory limit = " + MEMORY_LIMIT);
+
                     containerToRestart.add(m2.group(1));
                 }
             }
