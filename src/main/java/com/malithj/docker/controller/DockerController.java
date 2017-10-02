@@ -44,6 +44,7 @@ public class DockerController implements Runnable {
                 Thread.sleep((long) monitoringFrequency);
 
                 for (int i = 0; i < array.length; i++) {
+                    System.out.println(array[i]);
                     stopContainer(array[i], true);
                     Thread.sleep(TIME_BETWEEN_KILLS);
                 }
