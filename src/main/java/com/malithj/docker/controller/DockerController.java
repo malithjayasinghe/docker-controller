@@ -1,71 +1,61 @@
 package com.malithj.docker.controller;
 
-
 import java.io.*;
 import java.io.BufferedReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DockerController implements Runnable
-{
+public class DockerController implements Runnable {
 
     private static final String FILENAME = "/Users/temp/docker-controller/docker_stats";
-    public final int MONITERING_FREQUENCY = 100;
-    public final int TIME_BETWEEN_KILLS= 7000;
-    public final float MEMORY_LIMIT = 400;
+    public float monitoringFrequency = 100;
+    public final int TIME_BETWEEN_KILLS = 7000;
+    public float memoryLimit = 400;
     public static int killcount = 0;
-    private int count;
+    boolean isSwarm;
+    private String dockerRunCommand;
+    String containerKillCommand = "docker kill";
+    String containerStopCommand = "docker stop -t 5";
 
 
-    public DockerController() {
-        count = 0;
+    /**
+     * The controllers an individual docker container or set of containers in a swarm
+     *
+     * @param monitoringFrequency the time between monitoring
+     * @param memoryLimit         kill/stop the container if its memory usage exceeds this limit
+     * @param isSwarm             true if this is swarm
+     * @param dockerRunCommand    command to restart the container in the case of an individual container
+     */
+    public DockerController(Float monitoringFrequency, Float memoryLimit, boolean isSwarm, String dockerRunCommand) {
+        this.monitoringFrequency = monitoringFrequency;
+        this.memoryLimit = memoryLimit;
+        this.isSwarm = isSwarm;
+        this.dockerRunCommand = dockerRunCommand;
     }
 
     public void run() {
+        Runtime rt = Runtime.getRuntime();
 
-
-        while(true)
-        {
+        while (true) {
             try {
-                String command = "docker stop --time 5";
-                Runtime rt = Runtime.getRuntime();
 
-                String array [] = getRestartContainerIDs();
+                String array[] = getRestartContainerIDs();
+                Thread.sleep((long) monitoringFrequency);
 
-
-                Thread.sleep(MONITERING_FREQUENCY);
-
-                for (int i = 0; i < array.length; i++)
-                {
-                    String command1 = command + " " + array[i];
-                    System.out.println("killing the container " +  command1);
-                    Process proc = rt.exec(command1);
-                    System.out.println("kill counter = " + killcount++);
-
-                    BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-                    BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-                    System.out.println("Here is the standard output of the command:\n");
-                    String s;
-
-                    while ((s = stdInput.readLine()) != null) {
-                        System.out.println(s);
-                    }
-
-                    System.out.println("Here is the standard error of the command (if any):\n");
-                    while ((s = stdError.readLine()) != null) {
-                        System.out.println(s);
-                    }
-
+                for (int i = 0; i < array.length; i++) {
+                    stopContainer(array[i], true);
                     Thread.sleep(TIME_BETWEEN_KILLS);
                 }
 
                 System.out.print("\n");
 
+                if (!isSwarm) {
+                    Process proc = rt.exec(dockerRunCommand);
+                    printExecutionOutput(proc);
+                }
 
-            }catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -73,11 +63,42 @@ public class DockerController implements Runnable
 
     }
 
+    /**
+     * kill/stop a container with a given ID
+     *
+     * @param containerID the ID of the container to be killed
+     * @param isKill      kill if true, stop otherwise
+     * @throws IOException
+     */
+    private void stopContainer(String containerID, boolean isKill) throws IOException {
 
-    private String [] getRestartContainerIDs() throws IOException {
+        Runtime rt = Runtime.getRuntime();
+        String command1 = isKill == true ? containerKillCommand : containerStopCommand + " " + containerID;
+        System.out.println("killing the container " + command1);
+        Process proc = rt.exec(command1);
+        System.out.println("kill counter = " + killcount++);
+        printExecutionOutput(proc);
+
+    }
+
+    private void printExecutionOutput(Process process) throws IOException {
+        BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        System.out.println("Here is the standard output of the command:\n");
+        String s;
+        while ((s = stdInput.readLine()) != null) {
+            System.out.println(s);
+        }
+        System.out.println("Here is the standard error of the command (if any):\n");
+        while ((s = stdError.readLine()) != null) {
+            System.out.println(s);
+        }
+    }
+
+    private String[] getRestartContainerIDs() throws IOException {
         ArrayList<String> containerToRestart = new ArrayList<>();
         Runtime rt = Runtime.getRuntime();
-        Process proc= rt.exec("docker stats --no-stream");
+        Process proc = rt.exec("docker stats --no-stream");
         BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
         String line;
         String memoryRegex = "%(.*?)MiB /";
@@ -90,13 +111,13 @@ public class DockerController implements Runnable
             System.out.println(line);
             Matcher m1 = memoryPattern.matcher(line);
             Matcher m2 = containerIDPattern.matcher(line);
-            if(m1.find() && m2.find()) {
+            if (m1.find() && m2.find()) {
 
                 float usedMemory = Float.parseFloat(m1.group(1));
-                if(usedMemory  > MEMORY_LIMIT) {
+                if (usedMemory > memoryLimit) {
 
 
-                    System.out.println("      Adding to kill list: current memory = " + Float.parseFloat(m1.group(1)) + "   memory limit = " + MEMORY_LIMIT);
+                    System.out.println("      Adding to kill list: current memory = " + Float.parseFloat(m1.group(1)) + "   memory limit = " + memoryLimit);
 
                     containerToRestart.add(m2.group(1));
                 }
@@ -108,9 +129,17 @@ public class DockerController implements Runnable
     }
 
 
-    public static void main(String args[])
-    {
-        DockerController controller = new DockerController();
+    public static void main(String args[]) {
+        Float monitoringFrequency = Float.parseFloat(args[0]);
+        Float memoryLimit = Float.parseFloat(args[1]);
+        Boolean isSwarm = Boolean.parseBoolean(args[2]);
+        String dockerRunCommand = args[3];
+        DockerController controller = new DockerController(monitoringFrequency, memoryLimit, isSwarm, dockerRunCommand);
+
+        String m = args[1];
+        String n = args[2];
+
+
         controller.run();
         System.out.println("test");
     }
