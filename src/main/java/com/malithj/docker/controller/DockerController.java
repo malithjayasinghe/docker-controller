@@ -44,7 +44,7 @@ public class DockerController implements Runnable {
                 Thread.sleep((long) monitoringFrequency);
 
                 for (int i = 0; i < array.length; i++) {
-                    System.out.println(array[i]);
+
                     stopContainer(array[i], true);
                     Thread.sleep(TIME_BETWEEN_KILLS);
                 }
@@ -74,7 +74,8 @@ public class DockerController implements Runnable {
     private void stopContainer(String containerID, boolean isKill) throws IOException {
 
         Runtime rt = Runtime.getRuntime();
-        String command1 = isKill == true ? containerKillCommand : containerStopCommand + " " + containerID;
+        System.out.println("ID" + containerID);
+        String command1 = (isKill == true ? containerKillCommand : containerStopCommand) + " " + containerID;
         System.out.println("killing the container " + command1);
         Process proc = rt.exec(command1);
         System.out.println("kill counter = " + killcount++);
