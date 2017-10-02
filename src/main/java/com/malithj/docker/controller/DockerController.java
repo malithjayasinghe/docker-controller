@@ -95,6 +95,12 @@ public class DockerController implements Runnable {
         }
     }
 
+    /**
+     * Get container IDs
+     *
+     * @return the IDs of containers whose memory usage exceeds the specified limit
+     * @throws IOException
+     */
     private String[] getRestartContainerIDs() throws IOException {
         ArrayList<String> containerToRestart = new ArrayList<>();
         Runtime rt = Runtime.getRuntime();
@@ -112,13 +118,9 @@ public class DockerController implements Runnable {
             Matcher m1 = memoryPattern.matcher(line);
             Matcher m2 = containerIDPattern.matcher(line);
             if (m1.find() && m2.find()) {
-
                 float usedMemory = Float.parseFloat(m1.group(1));
                 if (usedMemory > memoryLimit) {
-
-
-                    System.out.println("      Adding to kill list: current memory = " + Float.parseFloat(m1.group(1)) + "   memory limit = " + memoryLimit);
-
+                    System.out.println("      Adding to kill list: current memory = " + Float.parseFloat(m1.group(1)) + "   memory limit = " + memoryLimit + "  container id" + m2.group(1));
                     containerToRestart.add(m2.group(1));
                 }
             }
