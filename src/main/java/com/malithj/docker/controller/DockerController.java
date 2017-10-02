@@ -42,19 +42,16 @@ public class DockerController implements Runnable {
 
                 String array[] = getRestartContainerIDs();
                 Thread.sleep((long) monitoringFrequency);
-
                 for (int i = 0; i < array.length; i++) {
-
                     stopContainer(array[i], true);
+                    if (!isSwarm) {
+                        Process proc = rt.exec(dockerRunCommand);
+                        printExecutionOutput(proc);
+                    }
+
                     Thread.sleep(TIME_BETWEEN_KILLS);
                 }
-
                 System.out.print("\n");
-
-                if (!isSwarm) {
-                    Process proc = rt.exec(dockerRunCommand);
-                    printExecutionOutput(proc);
-                }
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -74,7 +71,6 @@ public class DockerController implements Runnable {
     private void stopContainer(String containerID, boolean isKill) throws IOException {
 
         Runtime rt = Runtime.getRuntime();
-        System.out.println("ID" + containerID);
         String command1 = (isKill == true ? containerKillCommand : containerStopCommand) + " " + containerID;
         System.out.println("killing the container " + command1);
         Process proc = rt.exec(command1);
@@ -83,6 +79,12 @@ public class DockerController implements Runnable {
 
     }
 
+    /**
+     * Prints the execution output
+     *
+     * @param process
+     * @throws IOException
+     */
     private void printExecutionOutput(Process process) throws IOException {
         BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
         BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
