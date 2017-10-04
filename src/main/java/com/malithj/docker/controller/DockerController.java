@@ -13,6 +13,7 @@ public class DockerController implements Runnable {
     public final int TIME_BETWEEN_KILLS = 7000;
     public float memoryLimit = 400;
     public static int killcount = 0;
+    private float timeBetweenKills = 0;
     boolean isSwarm;
     private String dockerRunCommand;
     String containerKillCommand = "docker kill";
@@ -35,28 +36,32 @@ public class DockerController implements Runnable {
     }
 
     public void run() {
-        Runtime rt = Runtime.getRuntime();
+        try {
 
-        while (true) {
-            try {
+            Runtime rt = Runtime.getRuntime();
+            Process process;
+            if (!isSwarm) {
+                printExecutionOutput(rt.exec(dockerRunCommand));
+            }
 
+            while (true) {
                 String array[] = getRestartContainerIDs();
                 Thread.sleep((long) monitoringFrequency);
                 for (int i = 0; i < array.length; i++) {
                     stopContainer(array[i], true);
                     if (!isSwarm) {
-                        Process proc = rt.exec(dockerRunCommand);
-                        printExecutionOutput(proc);
+                        process = rt.exec(dockerRunCommand);
+                        printExecutionOutput(process);
                     }
 
                     Thread.sleep(TIME_BETWEEN_KILLS);
                 }
                 System.out.print("\n");
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
