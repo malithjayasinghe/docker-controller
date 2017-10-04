@@ -17,7 +17,7 @@ public class DockerController implements Runnable {
     boolean isSwarm;
     private String dockerRunCommand;
     String containerKillCommand = "docker kill";
-    String containerStopCommand = "docker stop -t 5";
+    String containerStopCommand = "docker stop -t 1";
 
 
     /**
@@ -50,6 +50,7 @@ public class DockerController implements Runnable {
                 for (int i = 0; i < array.length; i++) {
                     stopContainer(array[i], true);
                     if (!isSwarm) {
+                        Thread.sleep(1000);
                         process = rt.exec(dockerRunCommand);
                         printExecutionOutput(process);
                     }
@@ -138,6 +139,8 @@ public class DockerController implements Runnable {
 
         return containerToRestart.toArray(new String[containerToRestart.size()]);
     }
+
+
 
 
     public static void main(String args[]) {
