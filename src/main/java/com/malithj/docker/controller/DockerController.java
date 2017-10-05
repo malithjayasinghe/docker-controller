@@ -50,7 +50,6 @@ public class DockerController implements Runnable {
                 for (int i = 0; i < array.length; i++) {
                     stopContainer(array[i], true);
                     if (!isSwarm) {
-                        Thread.sleep(1000);
                         process = rt.exec(dockerRunCommand);
                         printExecutionOutput(process);
                     }
@@ -58,8 +57,11 @@ public class DockerController implements Runnable {
                     Thread.sleep(TIME_BETWEEN_KILLS);
                 }
                 System.out.print("\n");
-
-
+                // attempt to start the container if the first attempt fails
+               if (!isSwarm && (getNumberOfActiveContainers() ==0)) {
+                    process = rt.exec(dockerRunCommand);
+                    printExecutionOutput(process);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -139,6 +141,36 @@ public class DockerController implements Runnable {
 
         return containerToRestart.toArray(new String[containerToRestart.size()]);
     }
+
+    /**
+     * Gets the number of active containers
+     *
+     * @return the number of active
+     * @throws IOException throws to indicate that an I/O error has occurred
+     */
+    private int getNumberOfActiveContainers() throws IOException {
+
+        int count = 0;
+        Runtime rt = Runtime.getRuntime();
+        Process proc = rt.exec("docker stats --no-stream");
+        BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+        String line;
+        String memoryRegex = "%(.*?)MiB /";
+        Pattern memoryPattern = Pattern.compile(memoryRegex);
+        while ((line = stdInput.readLine()) != null) {
+            System.out.println(line);
+            Matcher m1 = memoryPattern.matcher(line);
+            if (m1.find()) {
+              count++;
+            }
+        }
+        System.out.print("Number of Active Contaienrs " +  count);
+        return count;
+    }
+
+
+
+
 
 
 
